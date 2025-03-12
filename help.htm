@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compact Image Slideshow with Scroll Arrows</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            background-image: url(bg2.jpg);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        .logo-container {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .logo {
+            max-width: 120px;
+            height: auto;
+        }
+        
+        .slideshow-container {
+            position: relative;
+            margin: 20px auto;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            background-color: white;
+            width: 100%;
+        }
+        
+        .slides-wrapper {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            /* Dynamic height will be set by JavaScript */
+        }
+        
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px 15px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: transform 0.8s ease, opacity 0.8s ease;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            z-index: 2;
+        }
+        
+        .slide.previous {
+            opacity: 0;
+            transform: translateX(-100%);
+            z-index: 1;
+        }
+        
+        .slide img {
+            max-width: 100%;
+            height: auto;
+            max-height: 200px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+            transition: transform 0.5s ease;
+            margin-top: 10px;
+        }
+        
+        @media (max-width: 480px) {
+            .slide img {
+                max-height: 150px;
+                margin-top: 5px;
+                margin-bottom: 5px;
+            }
+        }
+        
+        .slide img:hover {
+            transform: scale(1.02);
+        }
+        
+        .slide-text {
+            margin: 10px 0;
+            font-size: 16px;
+            line-height: 1.5;
+            color: #444;
+            max-width: 90%;
+            transition: transform 0.6s ease, opacity 0.6s ease;
+            transform: translateY(20px);
+            opacity: 0;
+            padding-bottom: 20px; /* Add padding to the bottom of text */
+        }
+        
+        @media (max-width: 480px) {
+            .slide-text {
+                font-size: 14px;
+                max-width: 100%;
+                margin: 5px 0;
+                padding-bottom: 10px;
+            }
+        }
+        
+        .slide.active .slide-text {
+            transform: translateY(0);
+            opacity: 1;
+            transition-delay: 0.3s;
+        }
+        
+        button {
+            background-color: #2c2c48;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 20px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(138, 15, 149, 0.3);
+            margin-top: 20px;
+            margin-bottom: 15px;
+            outline: none;
+        }
+        
+        @media (max-width: 480px) {
+            button {
+                padding: 8px 20px;
+                font-size: 14px;
+                margin-top: 15px;
+                margin-bottom: 10px;
+            }
+        }
+        
+        button:hover {
+            background-color: #3d3d69;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(145, 16, 192, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 4px rgba(214, 148, 247, 0.4);
+        }
+        
+        .progress-dots {
+            margin: 15px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #ddd;
+            margin: 0 4px;
+            transition: all 0.5s;
+            cursor: pointer;
+        }
+        
+        @media (max-width: 480px) {
+            .dot {
+                width: 6px;
+                height: 6px;
+                margin: 0 3px;
+            }
+        }
+        
+        .dot.active {
+            background-color: #3a3a5a;
+            transform: scale(1.3);
+            box-shadow: 0 0 4px rgba(2, 2, 4, 0.6);
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 15px;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 24px;
+                margin-bottom: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 20px;
+            }
+        }
+        
+        /* Scroll down arrow styles */
+        .scroll-arrow {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 30px;
+            cursor: pointer;
+            z-index: 10;
+            animation: bounce 2s infinite;
+        }
+        
+        .arrow {
+            position: relative;
+            width: 24px;
+            height: 24px;
+            margin: 0 auto;
+        }
+        
+        .arrow:before, .arrow:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 14px;
+            height: 3px;
+            border-radius: 1.5px;
+            background-color: #782e83;
+        }
+        
+        .arrow:before {
+            left: 0;
+            transform: rotate(45deg);
+        }
+        
+        .arrow:after {
+            right: 0;
+            transform: rotate(-45deg);
+        }
+        
+        .arrow-second {
+            position: relative;
+            width: 24px;
+            height: 24px;
+            margin: 3px auto 0;
+        }
+        
+        .arrow-second:before, .arrow-second:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 14px;
+            height: 3px;
+            border-radius: 1.5px;
+            background-color: #782e83;
+        }
+        
+        .arrow-second:before {
+            left: 0;
+            transform: rotate(45deg);
+        }
+        
+        .arrow-second:after {
+            right: 0;
+            transform: rotate(-45deg);
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0) translateX(-50%);
+            }
+            40% {
+                transform: translateY(-10px) translateX(-50%);
+            }
+            60% {
+                transform: translateY(-5px) translateX(-50%);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .scroll-arrow {
+                bottom: 5px;
+                width: 30px;
+                height: 20px;
+            }
+            
+            .arrow, .arrow-second {
+                width: 20px;
+                height: 20px;
+            }
+            
+            .arrow:before, .arrow:after,
+            .arrow-second:before, .arrow-second:after {
+                width: 12px;
+                height: 2px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-container">
+            <img src="Mazo_Art-removebg-preview.png" alt="Logo" class="logo">
+        </div>
+        
+        <h1>Help for Tracing Images</h1>
+        
+        <div class="slideshow-container">
+            <div class="slides-wrapper" id="slidesWrapper">
+                <div class="slide active">
+                    <img src="3.png" alt="Nature Landscape">
+                    <div class="slide-text">
+                        Click the 'Upload Overlay Image' button 📸 to select 
+                        an image from your gallery. Choose the picture you want to sketch ✏️
+                    </div>
+                </div>
+                
+                <div class="slide">
+                    <img src="2.png" alt="Ocean View">
+                    <div class="slide-text">
+                        Set the opacity to 14% for a better effect. If the opacity is low, the picture will appear faintly on the screen.
+                         You can place your phone over the sketchbook and trace the image 📱✏️
+                    </div>
+                </div>
+                
+                <div class="slide">
+                    <img src="Untitled design.png" alt="City Skyline">
+                    <div class="slide-text">
+                        Use the 'Toggle Grid' button 🟩 
+                        to add a grid to the picture. This will help you draw more easily ✏️
+                    </div>
+                </div>
+                
+                <!-- Scroll Down Arrow -->
+                <div class="scroll-arrow" id="scrollArrow">
+                    <div class="arrow"></div>
+                    <div class="arrow-second"></div>
+                </div>
+            </div>
+        </div>
+        
+        <button id="nextBtn">Next</button>
+        
+        <div class="progress-dots">
+            <span class="dot active"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const slides = document.querySelectorAll('.slide');
+            const dots = document.querySelectorAll('.dot');
+            const nextBtn = document.getElementById('nextBtn');
+            const scrollArrow = document.getElementById('scrollArrow');
+            const slidesWrapper = document.getElementById('slidesWrapper');
+            let currentSlide = 0;
+            let isAnimating = false;
+            let touchStartX = 0;
+            let touchEndX = 0;
+            
+            // Calculate and set the heights of all slides initially
+            updateSlideHeights();
+            
+            function updateSlideHeights() {
+                // Clone each slide temporarily to measure it while visible
+                slides.forEach((slide, index) => {
+                    const clone = slide.cloneNode(true);
+                    clone.style.position = 'static';
+                    clone.style.opacity = '0';
+                    clone.style.transform = 'none';
+                    clone.style.visibility = 'hidden';
+                    clone.style.height = 'auto';
+                    document.body.appendChild(clone);
+                    
+                    // Measure the clone height
+                    const height = clone.offsetHeight;
+                    slide.setAttribute('data-height', height);
+                    
+                    // Remove the clone
+                    document.body.removeChild(clone);
+                });
+                
+                // Find the tallest slide
+                let maxHeight = 0;
+                slides.forEach(slide => {
+                    const height = parseInt(slide.getAttribute('data-height'));
+                    maxHeight = Math.max(maxHeight, height);
+                });
+                
+                // Set the slides wrapper height
+                slidesWrapper.style.height = maxHeight + 'px';
+                
+                // Set each slide height
+                slides.forEach(slide => {
+                    slide.style.height = maxHeight + 'px';
+                });
+            }
+            
+            function showSlide(index) {
+                if (isAnimating) return;
+                isAnimating = true;
+                
+                // Get the current active slide
+                const currentActive = document.querySelector('.slide.active');
+                let previousIndex = Array.from(slides).indexOf(currentActive);
+                
+                // Update classes for smooth transitions
+                slides.forEach((slide, i) => {
+                    slide.classList.remove('active', 'previous');
+                    if (i === previousIndex) {
+                        slide.classList.add('previous');
+                    }
+                });
+                
+                // Update dots
+                dots.forEach((dot, i) => {
+                    dot.classList.remove('active');
+                    if (i === index) {
+                        dot.classList.add('active');
+                    }
+                });
+                
+                // Show the new slide with a slight delay for better transition
+                setTimeout(() => {
+                    slides[index].classList.add('active');
+                }, 50);
+                
+                // Allow new animations after transition completes
+                setTimeout(() => {
+                    isAnimating = false;
+                }, 900);
+                
+                // Hide scroll arrow on last slide
+                if (index === slides.length - 1) {
+                    scrollArrow.style.display = 'none';
+                } else {
+                    scrollArrow.style.display = 'block';
+                }
+            }
+            
+            function nextSlide() {
+                if (isAnimating) return;
+                const newIndex = (currentSlide + 1) % slides.length;
+                currentSlide = newIndex;
+                showSlide(newIndex);
+            }
+            
+            function prevSlide() {
+                if (isAnimating) return;
+                const newIndex = (currentSlide - 1 + slides.length) % slides.length;
+                currentSlide = newIndex;
+                showSlide(newIndex);
+            }
+            
+            // Add event listener to the next button
+            nextBtn.addEventListener('click', nextSlide);
+            
+            // Add event listener to the scroll arrow
+            scrollArrow.addEventListener('click', nextSlide);
+            
+            // Add event listeners to the dots
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                    if (index !== currentSlide && !isAnimating) {
+                        currentSlide = index;
+                        showSlide(index);
+                    }
+                });
+            });
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowDown') {
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                    prevSlide();
+                }
+            });
+            
+            // Touch events for swipe
+            document.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            });
+            
+            document.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            });
+            
+            function handleSwipe() {
+                const swipeThreshold = 50;
+                if (touchEndX + swipeThreshold < touchStartX) {
+                    // Swipe left
+                    nextSlide();
+                } else if (touchEndX > touchStartX + swipeThreshold) {
+                    // Swipe right
+                    prevSlide();
+                }
+            }
+            
+            // Update slide heights on window resize
+            window.addEventListener('resize', updateSlideHeights);
+            
+            // Initialize to hide arrow on last slide
+            if (currentSlide === slides.length - 1) {
+                scrollArrow.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
