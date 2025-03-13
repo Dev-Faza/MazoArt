@@ -6,6 +6,8 @@
   <title>MazoArt</title>
   <link rel="icon" type="image/x-icon" href="Screenshot 2025-03-07 202338.png">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="favicon.png">
+
 
   <style>
     body, html {
@@ -174,15 +176,14 @@
     }
 
     #opacitySlider {
-    width: 100%;
-    -webkit-appearance: none; /* Fix: Use a single colon */
-    appearance: none; /* Add standard property for compatibility */
-    height: 8px;
-    border-radius: 4px;
-    background: #3a3a5a;
-    outline: none;
-}
-
+      width: 100%;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 8px;
+      border-radius: 4px;
+      background: #3a3a5a;
+      outline: none;
+    }
 
     #opacitySlider::-webkit-slider-thumb {
       -webkit-appearance: none;
@@ -260,6 +261,136 @@
       top: 0;
     }
 
+    /* Review Box Styles */
+    .review-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .review-container {
+      background: linear-gradient(145deg, #2a2a40, #1e1e2f);
+      border-radius: 15px;
+      padding: 25px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .review-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .review-header h2 {
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+
+    .review-header p {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    .stars-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .star {
+      font-size: 30px;
+      cursor: pointer;
+      color: #666;
+      transition: color 0.2s ease;
+    }
+
+    .star.active {
+      color: #FFD700;
+    }
+
+    .review-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-group label {
+      font-size: 14px;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background-color: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .form-group textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .review-actions {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .review-actions button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .submit-review {
+      background-color: #4A5FE3;
+      color: white;
+    }
+
+    .submit-review:hover {
+      background-color: #3A4FD3;
+    }
+
+    .cancel-review {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+
+    .cancel-review:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .review-confirmation {
+      text-align: center;
+      display: none;
+    }
+
+    .review-confirmation h3 {
+      margin-bottom: 15px;
+    }
+
     /* Responsive Media Queries */
     @media (max-width: 992px) {
       .app-container {
@@ -305,6 +436,15 @@
       .logo-overlay {
         width: 45px;
         height: 45px;
+      }
+      
+      .review-container {
+        width: 85%;
+        padding: 20px;
+      }
+      
+      .star {
+        font-size: 28px;
       }
     }
 
@@ -354,6 +494,19 @@
         width: 40px;
         height: 40px;
       }
+      
+      .review-container {
+        width: 90%;
+        padding: 15px;
+      }
+      
+      .review-header h2 {
+        font-size: 20px;
+      }
+      
+      .star {
+        font-size: 24px;
+      }
     }
   </style>
 </head>
@@ -388,10 +541,51 @@
     </div>
     <button class="button" id="toggleGrid">Toggle Grid</button>
     <a href="./help.html" class="button">Help</a>
+  </div>
+</div>
 
-
-
-
+<!-- Review Modal -->
+<div class="review-modal" id="reviewModal">
+  <div class="review-container">
+    <div class="review-form-content" id="reviewFormContent">
+      <div class="review-header">
+        <h2>How are you enjoying MazoArt?</h2>
+        <p>Your feedback helps us improve!</p>
+      </div>
+      
+      <div class="stars-container">
+        <span class="star" data-rating="1">★</span>
+        <span class="star" data-rating="2">★</span>
+        <span class="star" data-rating="3">★</span>
+        <span class="star" data-rating="4">★</span>
+        <span class="star" data-rating="5">★</span>
+      </div>
+      
+      <form class="review-form" id="reviewForm">
+        <div class="form-group">
+          <label for="reviewEmail">Email Address</label>
+          <input type="email" id="reviewEmail" required placeholder="your@email.com">
+        </div>
+        
+        <div class="form-group">
+          <label for="reviewComment">Your Feedback</label>
+          <textarea id="reviewComment" placeholder="Tell us what you think about MazoArt..."></textarea>
+        </div>
+        
+        <div class="review-actions">
+          <button type="button" class="cancel-review" id="cancelReview">Not Now</button>
+          <button type="submit" class="submit-review" id="submitReview">Submit Feedback</button>
+        </div>
+      </form>
+    </div>
+    
+    <div class="review-confirmation" id="reviewConfirmation">
+      <h3>Thank you for your feedback!</h3>
+      <p>We appreciate you taking the time to share your thoughts with us.</p>
+      <div class="review-actions">
+        <button type="button" class="submit-review" id="closeConfirmation">Continue Using MazoArt</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -407,12 +601,140 @@
   let startX, startY, initialX, initialY;
   let scale = 1;
   let gridVisible = false;
+  
+  // Review modal elements
+  const reviewModal = document.getElementById('reviewModal');
+  const reviewForm = document.getElementById('reviewForm');
+  const reviewFormContent = document.getElementById('reviewFormContent');
+  const reviewConfirmation = document.getElementById('reviewConfirmation');
+  const stars = document.querySelectorAll('.star');
+  const cancelReview = document.getElementById('cancelReview');
+  const submitReview = document.getElementById('submitReview');
+  const closeConfirmation = document.getElementById('closeConfirmation');
+  
+  // Variables for review
+  let selectedRating = 0;
+  let reviewShown = false;
+  let reviewsData = [];
 
   // Handle menu toggle for mobile
   menuToggle.addEventListener('click', () => {
     menuToggle.classList.toggle('active');
     sidebar.classList.toggle('active');
   });
+
+  // Show review modal after 30 seconds
+  setTimeout(() => {
+    if (!reviewShown) {
+      showReviewModal();
+    }
+  }, 30000); // 30 seconds (30000 milliseconds)
+
+  // Function to show review modal
+  function showReviewModal() {
+    reviewModal.style.display = 'flex';
+    reviewShown = true;
+  }
+
+  // Handle star rating
+  stars.forEach(star => {
+    star.addEventListener('click', () => {
+      const rating = parseInt(star.getAttribute('data-rating'));
+      selectedRating = rating;
+      
+      // Reset all stars
+      stars.forEach(s => s.classList.remove('active'));
+      
+      // Set active stars
+      for (let i = 0; i < rating; i++) {
+        stars[i].classList.add('active');
+      }
+    });
+    
+    star.addEventListener('mouseover', () => {
+      const rating = parseInt(star.getAttribute('data-rating'));
+      
+      // Highlight stars on hover
+      for (let i = 0; i < stars.length; i++) {
+        if (i < rating) {
+          stars[i].style.color = '#FFD700';
+        } else {
+          stars[i].style.color = '#666';
+        }
+      }
+    });
+    
+    star.addEventListener('mouseout', () => {
+      // Reset to selected rating
+      stars.forEach((s, i) => {
+        if (i < selectedRating) {
+          s.style.color = '#FFD700';
+        } else {
+          s.style.color = '#666';
+        }
+      });
+    });
+  });
+
+  // Cancel review
+  cancelReview.addEventListener('click', () => {
+    reviewModal.style.display = 'none';
+  });
+
+  // Submit review
+  reviewForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const email = document.getElementById('reviewEmail').value;
+    const comment = document.getElementById('reviewComment').value;
+    
+    // Create review object
+    const reviewData = {
+      rating: selectedRating,
+      email: email,
+      comment: comment,
+      timestamp: new Date().toISOString()
+    };
+    
+    // Save to array (would be sent to server/GitHub in production)
+    reviewsData.push(reviewData);
+    
+    // Log the data (for demonstration)
+    console.log('Review submitted:', reviewData);
+    console.log('All reviews:', reviewsData);
+    
+    // Save to localStorage (temporary, would use GitHub API in production)
+    saveReviewsToLocalStorage();
+    
+    // Show confirmation
+    reviewFormContent.style.display = 'none';
+    reviewConfirmation.style.display = 'block';
+  });
+
+  // Close confirmation
+  closeConfirmation.addEventListener('click', () => {
+    reviewModal.style.display = 'none';
+    // Reset form for future use
+    reviewForm.reset();
+    selectedRating = 0;
+    stars.forEach(s => s.classList.remove('active'));
+    reviewFormContent.style.display = 'block';
+    reviewConfirmation.style.display = 'none';
+  });
+
+  // Save reviews to localStorage (temporary solution)
+  function saveReviewsToLocalStorage() {
+    localStorage.setItem('mazoArtReviews', JSON.stringify(reviewsData));
+  }
+
+  // Load reviews from localStorage (temporary solution)
+  function loadReviewsFromLocalStorage() {
+    const savedReviews = localStorage.getItem('mazoArtReviews');
+    if (savedReviews) {
+      reviewsData = JSON.parse(savedReviews);
+      console.log('Loaded reviews:', reviewsData);
+    }
+  }
 
   // Create grid with more rows and columns
   function createGrid() {
@@ -479,6 +801,7 @@
   // Init functions
   startCamera();
   createGrid();
+  loadReviewsFromLocalStorage();
   window.addEventListener('resize', handleResize);
 
   // File upload
